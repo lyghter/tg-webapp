@@ -13,43 +13,50 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
+      color: #ffffff;
     }
 
-    /* .question-image {
+    .question-text {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      background-color: #ddd;
-    } */
+      max-width: 400px;
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 16px;
+      background-color: #262C36;
+    }
 
     .answers-container {
       width: 100%;
+      max-width: 400px;
       display: flex;
       flex-direction: column;
-      margin-top: 10px;
+      gap: 10px;
     }
 
     .answer-button {
       width: 100%;
       padding: 15px;
-      margin: 5px 5px;
       font-size: 16px;
       border: none;
-      border-radius: 16;
+      border-radius: 16px;
       cursor: pointer;
       background-color: #262C36;
       color: #ffffff;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, box-shadow 0.2s;
     }
 
     .answer-button:hover {
       background-color: #0056b3;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
 
-  <img src="" alt="Вопрос" class="question-image" id="questionImage">
+  <div class="question-text" id="questionText"></div>
 
   <div class="answers-container" id="answersContainer"></div>
 
@@ -58,26 +65,23 @@
     tg.expand();
     tg.MainButton.hide();
 
-    // Массив вопросов (можно добавлять сколько угодно)
+    // Массив вопросов с текстом и вариантами
     const questions = [
-      { img: 'https://via.placeholder.com/400', options: ['Вариант 1', 'Вариант 2', 'Вариант 3', 'Вариант 4'] },
-      { img: 'https://via.placeholder.com/400/ff9999', options: ['A', 'B', 'C', 'D'] },
-      { img: 'https://via.placeholder.com/400/99ff99', options: ['Да', 'Нет', 'Может', 'Не знаю'] }
+      { text: 'Какой ваш любимый цвет?', options: ['Красный', 'Синий', 'Зелёный', 'Жёлтый'] },
+      { text: 'Вы любите котов или собак?', options: ['Котов', 'Собак', 'Обеих', 'Ни тех ни других'] },
+      { text: 'Хотите ли вы участвовать в конкурсе?', options: ['Да', 'Нет', 'Может быть', 'Не знаю'] }
     ];
 
     let currentQuestion = 0;
 
     function showQuestion(index) {
       const q = questions[index];
-      const questionImage = document.getElementById('questionImage');
+      const questionText = document.getElementById('questionText');
       const answersContainer = document.getElementById('answersContainer');
 
-      questionImage.src = q.img;
-
-      // Очищаем предыдущие кнопки
+      questionText.textContent = q.text;
       answersContainer.innerHTML = '';
 
-      // Создаём новые кнопки
       q.options.forEach(option => {
         const btn = document.createElement('button');
         btn.textContent = option;
@@ -104,4 +108,3 @@
 
 </body>
 </html>
-
