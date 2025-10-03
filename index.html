@@ -65,7 +65,22 @@
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+    
     tg.MainButton.hide();
+    
+    // 🟡 Задаём фиксированный цвет шапки (тёмный), вне зависимости от темы
+    const DARK_HEADER_COLOR = '#0D1117';
+
+    function setDarkHeader() {
+      tg.setHeaderColor(DARK_HEADER_COLOR);
+    }
+
+    // Применяем сразу
+    setDarkHeader();
+
+    // Если пользователь сменит тему — применяем снова
+    tg.onEvent('themeChanged', setDarkHeader);
+    
 
     const questions = [
       { text: 'Какой ваш любимый цвет?', options: ['Красный', 'Синий', 'Зелёный', 'Жёлтый'] },
