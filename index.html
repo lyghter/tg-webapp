@@ -6,26 +6,73 @@
   <title>Telegram Web App Анкета</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: Arial, sans-serif;
       background-color: #0D1117;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px; /* отступы от краёв экрана */
       color: #ffffff;
     }
 
-    .question-text {
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; /* закрепляем полюса */
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .top, .bottom {
       width: 100%;
-      max-width: 600px; /* ограничение ширины на больших экранах */
+      max-width: 600px;
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .back-button, .next-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #262C36;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.3s ease, background-color 0.2s;
+      opacity: 0;              /* изначально невидима */
+      pointer-events: none;    /* клики недоступны */
+    }
+
+    .back-button.active, .next-button.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .back-button:hover, .next-button:hover {
+      background-color: #303845;
+    }
+
+    .center {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* вертикально центрируем */
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .question-text {
       font-size: 20px;
       text-align: center;
       margin-bottom: 20px;
       padding: 15px;
       border-radius: 16px;
       background-color: #262C36;
+      width: 100%;
       box-sizing: border-box;
     }
 
@@ -38,57 +85,67 @@
     }
 
     .answer-button {
-      width: 100%;         /* растягиваем на всю ширину контейнера */
-      max-width: 600px;    /* ограничение ширины кнопки */
+      width: 100%;
       padding: 15px;
-      font-size: 16px;
+      font-size: 18px;
       border: none;
       border-radius: 16px;
       cursor: pointer;
       background-color: #262C36;
       color: #ffffff;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      transition: background-color 0.2s;
       box-sizing: border-box;
     }
 
     .answer-button:hover {
-      background-color: #0056b3;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      background-color: #303845;
+    }
+
+    .answer-button.selected {
+      background-color: #198754; /* зелёный для single choice */
     }
   </style>
 </head>
 <body>
 
-  <div class="question-text" id="questionText"></div>
-  <div class="answers-container" id="answersContainer"></div>
+  <div class="top">
+    <button class="back-button" id="backButton">Назад</button>
+  </div>
 
+  <div class="center">
+    <div class="question-text" id="questionText"></div>
+    <div class="answers-container" id="answersContainer"></div>
+  </div>
+
+  <div class="bottom">
+    <button class="next-button" id="nextButton">Далее</button>
+  </div>
+  
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    
     tg.MainButton.hide();
-    
-    // 🟡 Задаём фиксированный цвет шапки (тёмный), вне зависимости от темы
-    const DARK_HEADER_COLOR = '#0D1117';
 
+    const DARK_HEADER_COLOR = '#0D1117';
     function setDarkHeader() {
       tg.setHeaderColor(DARK_HEADER_COLOR);
     }
-
-    // Применяем сразу
     setDarkHeader();
-
-    // Если пользователь сменит тему — применяем снова
     tg.onEvent('themeChanged', setDarkHeader);
-    
 
     const questions = [
-      { text: 'Какой ваш любимый цвет?', options: ['Красный', 'Синий', 'Зелёный', 'Жёлтый'] },
-      { text: 'Вы любите котов или собак?', options: ['Котов', 'Собак', 'Обеих', 'Ни тех ни других'] },
-      { text: 'Хотите ли вы участвовать в конкурсе?', options: ['Да', 'Нет', 'Может быть', 'Не знаю'] }
+      { text: 'Какой ваш любимый цвет?', options: ['Красный','Синий'] },
+      { text: 'Вы любите котов или собак?', options: ['Котов','Собак','Обеих','Ни тех ни других'] },
+      { text: 'Хотите ли вы участвовать в конкурсе?', options: ['Да','Нет','Может быть','Не знаю'] }
     ];
 
     let currentQuestion = 0;
+    let selectedButton = null;
+    let selectedOption = null;
+    const answers = new Array(questions.length).fill(null);
+
+    const nextButton = document.getElementById('nextButton');
+    const backButton = document.getElementById('backButton');
 
     function showQuestion(index) {
       const q = questions[index];
@@ -97,28 +154,63 @@
 
       questionText.textContent = q.text;
       answersContainer.innerHTML = '';
+      selectedButton = null;
+      selectedOption = answers[index]; 
+
+      // скрываем кнопки по умолчанию
+      backButton.classList.remove('active');
+      nextButton.classList.remove('active');
 
       q.options.forEach(option => {
         const btn = document.createElement('button');
         btn.textContent = option;
         btn.className = 'answer-button';
-        btn.onclick = () => answer(option);
+
+        if (selectedOption === option) {
+          btn.classList.add('selected');
+          selectedButton = btn;
+          nextButton.classList.add('active');
+        }
+
+        btn.onclick = () => selectAnswer(btn, option);
         answersContainer.appendChild(btn);
       });
-    }
 
-    function answer(option) {
-      tg.sendData(option); // отправка ответа боту
-
-      currentQuestion++;
-      if (currentQuestion < questions.length) {
-        showQuestion(currentQuestion);
-      } else {
-        tg.close(); // закрытие WebApp после последнего вопроса
+      if (index > 0) {
+        backButton.classList.add('active');
       }
     }
 
-    // Показываем первый вопрос
+    function selectAnswer(button, option) {
+      if (selectedButton && selectedButton !== button) {
+        selectedButton.classList.remove('selected');
+      }
+      button.classList.add('selected');
+      selectedButton = button;
+      selectedOption = option;
+      answers[currentQuestion] = option;
+      nextButton.classList.add('active');
+    }
+
+    nextButton.onclick = () => {
+      if (selectedOption) {
+        tg.sendData(selectedOption);
+        if (currentQuestion < questions.length - 1) {
+          currentQuestion++;
+          showQuestion(currentQuestion);
+        } else {
+          tg.close();
+        }
+      }
+    };
+
+    backButton.onclick = () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
+    };
+
     showQuestion(currentQuestion);
   </script>
 
