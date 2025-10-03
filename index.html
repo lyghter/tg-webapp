@@ -13,31 +13,33 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 20px; /* отступы от краёв экрана */
       color: #ffffff;
     }
 
     .question-text {
       width: 100%;
-      max-width: 400px;
+      max-width: 600px; /* ограничение ширины на больших экранах */
       font-size: 20px;
       text-align: center;
       margin-bottom: 20px;
       padding: 15px;
       border-radius: 16px;
       background-color: #262C36;
+      box-sizing: border-box;
     }
 
     .answers-container {
       width: 100%;
-      max-width: 400px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      align-items: center;
     }
 
     .answer-button {
-      width: 100%;
+      width: 100%;         /* растягиваем на всю ширину контейнера */
+      max-width: 600px;    /* ограничение ширины кнопки */
       padding: 15px;
       font-size: 16px;
       border: none;
@@ -46,6 +48,7 @@
       background-color: #262C36;
       color: #ffffff;
       transition: background-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
     }
 
     .answer-button:hover {
@@ -57,7 +60,6 @@
 <body>
 
   <div class="question-text" id="questionText"></div>
-
   <div class="answers-container" id="answersContainer"></div>
 
   <script>
@@ -65,7 +67,6 @@
     tg.expand();
     tg.MainButton.hide();
 
-    // Массив вопросов с текстом и вариантами
     const questions = [
       { text: 'Какой ваш любимый цвет?', options: ['Красный', 'Синий', 'Зелёный', 'Жёлтый'] },
       { text: 'Вы любите котов или собак?', options: ['Котов', 'Собак', 'Обеих', 'Ни тех ни других'] },
@@ -92,13 +93,13 @@
     }
 
     function answer(option) {
-      tg.sendData(option); // Отправляем ответ боту
+      tg.sendData(option); // отправка ответа боту
 
       currentQuestion++;
       if (currentQuestion < questions.length) {
         showQuestion(currentQuestion);
       } else {
-        tg.close(); // Закрываем WebApp после последнего вопроса
+        tg.close(); // закрытие WebApp после последнего вопроса
       }
     }
 
