@@ -1,218 +1,314 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Web App Анкета</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-      background-color: #0D1117;
-      color: #ffffff;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between; /* закрепляем полюса */
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .top, .bottom {
-      width: 100%;
-      max-width: 600px;
-      display: flex;
-      justify-content: center;
-      margin: 10px 0;
-    }
-
-    .back-button, .next-button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background-color: #262C36;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: opacity 0.3s ease, background-color 0.2s;
-      opacity: 0;              /* изначально невидима */
-      pointer-events: none;    /* клики недоступны */
-    }
-
-    .back-button.active, .next-button.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .back-button:hover, .next-button:hover {
-      background-color: #303845;
-    }
-
-    .center {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center; /* вертикально центрируем */
-      align-items: center;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .question-text {
-      font-size: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-      padding: 15px;
-      border-radius: 16px;
-      background-color: #262C36;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .answers-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .answer-button {
-      width: 100%;
-      padding: 15px;
-      font-size: 18px;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      background-color: #262C36;
-      color: #ffffff;
-      transition: background-color 0.2s;
-      box-sizing: border-box;
-    }
-
-    .answer-button:hover {
-      background-color: #303845;
-    }
-
-    .answer-button.selected {
-      background-color: #198754; /* зелёный для single choice */
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram Web App Анкета</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: #0D1117;
+  color: #ffffff;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.top, .bottom {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+.back-button, .next-button {
+  padding: 12px;
+  font-size: 16px;
+  background-color: #262C36;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  height: 50px;
+}
+.back-button:hover, .next-button:hover {
+  background-color: #303845;
+}
+.center {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.question-text {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 16px;
+  background-color: #262C36;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: pre-wrap; /* Поддержка \n для переносов */
+}
+.answers-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+.row {
+  display: flex;
+  gap: 10px;
+}
+.row .answer-button {
+  flex: 1;
+}
+.answer-button {
+  padding: 15px;
+  font-size: 18px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  background-color: #262C36;
+  color: #ffffff;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+}
+.answer-button:hover {
+  background-color: #303845;
+}
+.answer-button.single-selected {
+  background-color: #198754;
+}
+.answer-button.multi-selected {
+  background-color: #0d6efd;
+}
+.flash-fade {
+  animation: flash-fade 0.5s ease;
+}
+@keyframes flash-fade {
+  0% { background-color: #262C36; }
+  50% { background-color: #505A6B; }
+  100% { background-color: #262C36; }
+}
+</style>
 </head>
 <body>
 
-  <div class="top">
-    <button class="back-button" id="backButton">Назад</button>
-  </div>
+<div class="top">
+  <button class="back-button" id="backButton"></button>
+</div>
 
-  <div class="center">
-    <div class="question-text" id="questionText"></div>
-    <div class="answers-container" id="answersContainer"></div>
-  </div>
+<div class="center">
+  <div class="question-text" id="questionText"></div>
+  <div class="answers-container" id="answersContainer"></div>
+</div>
 
-  <div class="bottom">
-    <button class="next-button" id="nextButton">Далее</button>
-  </div>
-  
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.MainButton.hide();
+<div class="bottom">
+  <button class="next-button" id="nextButton"></button>
+</div>
 
-    const DARK_HEADER_COLOR = '#0D1117';
-    function setDarkHeader() {
-      tg.setHeaderColor(DARK_HEADER_COLOR);
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.MainButton.hide();
+
+const DARK_HEADER_COLOR = '#0D1117';
+function setDarkHeader() { tg.setHeaderColor(DARK_HEADER_COLOR); }
+setDarkHeader();
+tg.onEvent('themeChanged', setDarkHeader);
+
+const questions = [
+  { text: 'ВАШ ПОЛ',
+    options: [
+      ['ЖЕНСКИЙ'],
+      ['МУЖСКОЙ']
+    ], type: 'single' },
+  { text: 'ВАШ ВОЗРАСТ', 
+    options: [
+      ['18-21','22-25','26-29'],
+      ['30-34','35-39','40-44'],
+      ['45-49','50-54','55-59'],
+      ['60-64','65-69','70+'],
+    ], type: 'single' },
+  { text: 'УКАЖЕМ ВАШ ГОРОД?',
+    options: [
+      ['ДА'],
+      ['НЕТ']
+    ], type: 'single' },
+  { text: 'КОГО ХОТИТЕ НАЙТИ?\n(выберите один или несколько вариантов)',
+    options: [
+      ['ДРУГА'],
+      ['ПОДРУГУ']
+    ], type: 'multi' },  
+];
+
+let currentQuestion = 0;
+let selectedButtons = [];
+const answers = new Array(questions.length).fill(null);
+
+const nextButton = document.getElementById('nextButton');
+const backButton = document.getElementById('backButton');
+
+function fitTextToButton(button, text) {
+  const words = text.split(' ');
+  let truncated = '';
+  button.textContent = '';
+  for(let i=0; i<words.length; i++){
+    const temp = truncated + (truncated ? ' ' : '') + words[i] + '…';
+    button.textContent = temp;
+    if(button.scrollWidth > button.clientWidth){
+      if(truncated === '') truncated = words[i] + '…';
+      break;
     }
-    setDarkHeader();
-    tg.onEvent('themeChanged', setDarkHeader);
+    truncated += (truncated ? ' ' : '') + words[i];
+  }
+  button.textContent = truncated;
+}
 
-    const questions = [
-      { text: 'Какой ваш любимый цвет?', options: ['Красный','Синий'] },
-      { text: 'Вы любите котов или собак?', options: ['Котов','Собак','Обеих','Ни тех ни других'] },
-      { text: 'Хотите ли вы участвовать в конкурсе?', options: ['Да','Нет','Может быть','Не знаю'] }
-    ];
+function updateBackButtonText() {
+  if (currentQuestion > 0) {
+    fitTextToButton(backButton, questions[currentQuestion - 1].text);
+  } else {
+    backButton.textContent = '';
+  }
+}
 
-    let currentQuestion = 0;
-    let selectedButton = null;
-    let selectedOption = null;
-    const answers = new Array(questions.length).fill(null);
+function updateNextButtonText() {
+  if (answers[currentQuestion] && (Array.isArray(answers[currentQuestion]) ? answers[currentQuestion].length>0 : true)) {
+    if (currentQuestion < questions.length - 1) {
+      fitTextToButton(nextButton, questions[currentQuestion + 1].text);
+    } else {
+      nextButton.textContent = 'продолжение следует ...';
+    }
+  } else {
+    nextButton.textContent = '';
+  }
+}
 
-    const nextButton = document.getElementById('nextButton');
-    const backButton = document.getElementById('backButton');
+function flashRowButtons(row) {
+  const buttons = row.querySelectorAll('.answer-button');
+  buttons.forEach(btn => {
+    btn.classList.remove('flash-fade');
+    void btn.offsetWidth;
+    btn.classList.add('flash-fade');
+    setTimeout(() => btn.classList.remove('flash-fade'), 500);
+  });
+}
 
-    function showQuestion(index) {
-      const q = questions[index];
-      const questionText = document.getElementById('questionText');
-      const answersContainer = document.getElementById('answersContainer');
+function showQuestion(index) {
+  const q = questions[index];
+  const questionText = document.getElementById('questionText');
+  const answersContainer = document.getElementById('answersContainer');
 
-      questionText.textContent = q.text;
-      answersContainer.innerHTML = '';
-      selectedButton = null;
-      selectedOption = answers[index]; 
+  questionText.textContent = q.text;
+  answersContainer.innerHTML = '';
+  selectedButtons = [];
 
-      // скрываем кнопки по умолчанию
-      backButton.classList.remove('active');
-      nextButton.classList.remove('active');
+  updateBackButtonText();
+  updateNextButtonText();
 
-      q.options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.textContent = option;
-        btn.className = 'answer-button';
+  q.options.forEach(rowArray => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'row';
+    rowArray.forEach(option => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.className = 'answer-button';
 
-        if (selectedOption === option) {
-          btn.classList.add('selected');
-          selectedButton = btn;
-          nextButton.classList.add('active');
+      const saved = answers[index];
+      if (saved) {
+        if (q.type === 'single' && saved === option) {
+          btn.classList.add('single-selected');
+          selectedButtons.push(btn);
+        } else if (q.type === 'multi' && saved.includes(option)) {
+          btn.classList.add('multi-selected');
+          selectedButtons.push(btn);
         }
-
-        btn.onclick = () => selectAnswer(btn, option);
-        answersContainer.appendChild(btn);
-      });
-
-      if (index > 0) {
-        backButton.classList.add('active');
       }
+
+      btn.onclick = () => selectAnswer(btn, option, q.type, index);
+      rowDiv.appendChild(btn);
+    });
+    answersContainer.appendChild(rowDiv);
+  });
+}
+
+function selectAnswer(btn, option, type, index) {
+  if (type === 'single') {
+    if (selectedButtons.includes(btn)) {
+      btn.classList.remove('single-selected');
+      selectedButtons = [];
+      answers[index] = null;
+    } else {
+      selectedButtons.forEach(b => b.classList.remove('single-selected'));
+      selectedButtons = [btn];
+      btn.classList.add('single-selected');
+      answers[index] = option;
     }
-
-    function selectAnswer(button, option) {
-      if (selectedButton && selectedButton !== button) {
-        selectedButton.classList.remove('selected');
-      }
-      button.classList.add('selected');
-      selectedButton = button;
-      selectedOption = option;
-      answers[currentQuestion] = option;
-      nextButton.classList.add('active');
+  } else if (type === 'multi') {
+    if (btn.classList.contains('multi-selected')) {
+      btn.classList.remove('multi-selected');
+      selectedButtons = selectedButtons.filter(b => b !== btn);
+    } else {
+      btn.classList.add('multi-selected');
+      selectedButtons.push(btn);
     }
+    answers[index] = selectedButtons.map(b => b.textContent);
+  }
+  updateNextButtonText();
+}
 
-    nextButton.onclick = () => {
-      if (selectedOption) {
-        tg.sendData(selectedOption);
-        if (currentQuestion < questions.length - 1) {
-          currentQuestion++;
-          showQuestion(currentQuestion);
-        } else {
-          tg.close();
-        }
-      }
-    };
+nextButton.onclick = () => {
+  if (!nextButton.textContent) {
+    document.querySelectorAll('.row').forEach(row => flashRowButtons(row));
+    return;
+  }
+  if (answers[currentQuestion] && (Array.isArray(answers[currentQuestion]) ? answers[currentQuestion].length>0 : true)) {
+    tg.sendData(JSON.stringify(answers[currentQuestion]));
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      showQuestion(currentQuestion);
+    } else {
+      tg.close();
+    }
+  }
+};
 
-    backButton.onclick = () => {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion(currentQuestion);
-      }
-    };
-
+backButton.onclick = () => {
+  if (!backButton.textContent) {
+    tg.close();
+    return;
+  }
+  if (currentQuestion > 0) {
+    currentQuestion--;
     showQuestion(currentQuestion);
-  </script>
+  }
+};
+
+showQuestion(currentQuestion);
+window.addEventListener('resize', () => {
+  updateBackButtonText();
+  updateNextButtonText();
+});
+</script>
 
 </body>
 </html>
