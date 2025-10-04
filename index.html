@@ -14,20 +14,32 @@ html, body {
   background-color: #0D1117;
   color: #ffffff;
 }
+
 body {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center; /* центрируем wrapper по горизонтали */
+  align-items: stretch;
   padding: 20px;
   box-sizing: border-box;
 }
+
+.wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
 .top, .bottom {
   width: 100%;
   display: flex;
   justify-content: center;
   margin: 10px 0;
 }
+
 .back-button, .next-button {
   padding: 12px;
   font-size: 16px;
@@ -41,11 +53,9 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  height: 50px;
+  height: 50px; /* фиксированная высота */
 }
-.back-button:hover, .next-button:hover {
-  background-color: #303845;
-}
+
 .center {
   flex-grow: 1;
   display: flex;
@@ -54,6 +64,7 @@ body {
   align-items: center;
   width: 100%;
 }
+
 .question-text {
   font-size: 20px;
   font-weight: bold;
@@ -66,6 +77,7 @@ body {
   box-sizing: border-box;
   white-space: pre-wrap; /* Поддержка \n для переносов */
 }
+
 .answers-container {
   width: 100%;
   display: flex;
@@ -73,13 +85,16 @@ body {
   gap: 10px;
   align-items: stretch;
 }
+
 .row {
   display: flex;
   gap: 10px;
 }
+
 .row .answer-button {
   flex: 1;
 }
+
 .answer-button {
   padding: 15px;
   font-size: 18px;
@@ -91,44 +106,49 @@ body {
   transition: background-color 0.2s;
   box-sizing: border-box;
 }
-.answer-button:hover {
-  background-color: #303845;
+
+@media (hover: hover) {
+  .answer-button:hover,
+  .back-button:hover,
+  .next-button:hover {
+    background-color: #303845;
+  }
 }
+
 .answer-button.single-selected {
   background-color: #198754;
 }
+
 .answer-button.multi-selected {
   background-color: #0d6efd;
 }
+
 .flash-fade {
   animation: flash-fade 0.5s ease;
 }
+
 @keyframes flash-fade {
   0% { background-color: #262C36; }
   50% { background-color: #505A6B; }
   100% { background-color: #262C36; }
 }
-button {
-  -webkit-tap-highlight-color: transparent; /* отключает системный всплеск при тапе */
-  outline: none; /* убирает возможные обводки после тапа */
-}
-  
-  
 </style>
 </head>
 <body>
 
-<div class="top">
-  <button class="back-button" id="backButton"></button>
-</div>
+<div class="wrapper">
+  <div class="top">
+    <button class="back-button" id="backButton"></button>
+  </div>
 
-<div class="center">
-  <div class="question-text" id="questionText"></div>
-  <div class="answers-container" id="answersContainer"></div>
-</div>
+  <div class="center">
+    <div class="question-text" id="questionText"></div>
+    <div class="answers-container" id="answersContainer"></div>
+  </div>
 
-<div class="bottom">
-  <button class="next-button" id="nextButton"></button>
+  <div class="bottom">
+    <button class="next-button" id="nextButton"></button>
+  </div>
 </div>
 
 <script>
